@@ -477,7 +477,6 @@ class TicTacToeApp {
             modal.classList.remove('hidden');
         }
     }
-    }
 
     /**
      * Start game
