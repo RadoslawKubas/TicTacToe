@@ -55,13 +55,13 @@ class ApiService {
     /**
      * Make a move
      * @param {string} gameId - Game ID
-     * @param {Object} move - Move data
+     * @param {Object} move - Move data (row, col, player)
      * @returns {Promise} Updated game state
      */
     async makeMove(gameId, move) {
-        return this.request('/game/move', {
+        return this.request(`/game/${gameId}/move`, {
             method: 'POST',
-            body: JSON.stringify({ gameId, move })
+            body: JSON.stringify(move)
         });
     }
 
@@ -85,7 +85,70 @@ class ApiService {
     async getAIMove(gameState, difficulty) {
         return this.request('/ai/move', {
             method: 'POST',
-            body: JSON.stringify({ gameState, difficulty })
+            body: JSON.stringify({
+                board: gameState.board,
+                currentPlayer: gameState.currentPlayer,
+                difficulty,
+                boardSize: gameState.settings?.boardSize || 3,
+                winCondition: gameState.settings?.winCondition || 3
+            })
+        });
+    }
+
+    /**
+     * Analyze position
+     * @param {Object} gameState - Current game state
+     * @returns {Promise} Analysis result
+     */
+    async analyzePosition(gameState) {
+        return this.request('/ai/analyze', {
+            method: 'POST',
+            body: JSON.stringify({
+                board: gameState.board,
+                currentPlayer: gameState.currentPlayer,
+                boardSize: gameState.settings?.boardSize || 3,
+                winCondition: gameState.settings?.winCondition || 3
+            })
+        });
+    }
+
+    /**
+     * Get hint for current position
+     * @param {Object} gameState - Current game state
+     * @returns {Promise} Hint move
+     */
+    async getHint(gameState) {
+        return this.request('/ai/hint', {
+            method: 'POST',
+            body: JSON.stringify({
+                board: gameState.board,
+                currentPlayer: gameState.currentPlayer,
+                boardSize: gameState.settings?.boardSize || 3,
+                winCondition: gameState.settings?.winCondition || 3
+            })
+        });
+    }
+
+    /**
+     * Undo last move
+     * @param {string} gameId - Game ID
+     * @returns {Promise} Updated game state
+     */
+    async undoMove(gameId) {
+        return this.request(`/game/${gameId}/undo`, {
+            method: 'POST'
+        });
+    }
+
+    /**
+     * Submit score to leaderboard
+     * @param {Object} scoreData - Score data
+     * @returns {Promise} Submission result
+     */
+    async submitScore(scoreData) {
+        return this.request('/leaderboard/submit', {
+            method: 'POST',
+            body: JSON.stringify(scoreData)
         });
     }
 

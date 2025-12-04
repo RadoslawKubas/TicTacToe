@@ -300,6 +300,63 @@
                 </div>
             </div>
         </div>
+
+        <!-- Waiting for Opponent Modal (Online) -->
+        <div id="waiting-modal" class="modal hidden">
+            <div class="modal-content waiting-modal">
+                <div class="spinner"></div>
+                <h2>Oczekiwanie na przeciwnika...</h2>
+                <p>Udostępnij link znajomemu aby dołączył do gry</p>
+                <div class="game-link-container">
+                    <input type="text" id="game-link" readonly class="game-link-input">
+                    <button id="copy-link-btn" class="btn secondary">Kopiuj</button>
+                </div>
+                <button id="cancel-waiting-btn" class="btn secondary">Anuluj</button>
+            </div>
+        </div>
+
+        <!-- Error Modal -->
+        <div id="error-modal" class="modal hidden">
+            <div class="modal-content error-modal">
+                <h2>Błąd</h2>
+                <p id="error-message"></p>
+                <button id="close-error-btn" class="btn primary">OK</button>
+            </div>
+        </div>
+
+        <!-- Info Modal -->
+        <div id="info-modal" class="modal hidden">
+            <div class="modal-content info-modal">
+                <h2>Informacja</h2>
+                <p id="info-message"></p>
+                <button id="close-info-btn" class="btn primary">OK</button>
+            </div>
+        </div>
+
+        <!-- Rematch Request Modal -->
+        <div id="rematch-modal" class="modal hidden">
+            <div class="modal-content rematch-modal">
+                <h2>Rewanż?</h2>
+                <p>Przeciwnik chce zagrać rewanż!</p>
+                <div class="rematch-actions">
+                    <button id="accept-rematch-btn" class="btn primary">Akceptuj</button>
+                    <button id="decline-rematch-btn" class="btn secondary">Odrzuć</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Online Chat Panel -->
+        <div id="chat-panel" class="chat-panel hidden">
+            <div class="chat-header">
+                <h3>Chat</h3>
+                <button id="toggle-chat-btn" class="btn-icon">−</button>
+            </div>
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Wpisz wiadomość..." maxlength="200">
+                <button id="send-chat-btn" class="btn primary">Wyślij</button>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->

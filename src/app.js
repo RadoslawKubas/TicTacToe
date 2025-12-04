@@ -285,6 +285,8 @@ class TicTacToeApp {
         
         if (mode === 'ai') {
             this.showDifficultySelector();
+        } else if (mode === 'online') {
+            this.startOnlineGame();
         } else {
             this.startGame();
         }
@@ -298,6 +300,183 @@ class TicTacToeApp {
         this.gameState.settings.difficulty = difficulty;
         this.playerPanel.setPlayer2AI(true);
         this.startGame();
+    }
+
+    /**
+     * Start online game
+     */
+    async startOnlineGame() {
+        try {
+            // Create game on server
+            const gameData = await this.apiService.createGame({
+                mode: 'online',
+                boardSize: this.gameState.settings.boardSize || 3,
+                winCondition: this.gameState.settings.winCondition || 3,
+                playerX: this.userState.profile?.name || 'Player 1'
+            });
+            
+            this.gameState.gameId = gameData.gameId;
+            
+            // Setup WebSocket handlers
+            this.setupWebSocketHandlers();
+            
+            // Connect to WebSocket
+            this.wsService.connect(
+                gameData.gameId,
+                this.userState.profile?.name || 'Player',
+                this.userState.id
+            );
+            
+            // Show game screen
+            this.showGameScreen();
+            this.gameBoard.render();
+            this.scoreBoard.update();
+            this.playerPanel.update();
+            
+            // Show waiting for opponent message
+            this.showWaitingModal();
+            
+        } catch (error) {
+            console.error('Failed to start online game:', error);
+            this.showErrorModal('Nie udało się rozpocząć gry online.');
+        }
+    }
+
+    /**
+     * Setup WebSocket event handlers
+     */
+    setupWebSocketHandlers() {
+        this.wsService.on('onGameState', (data) => {
+            this.gameState.board = data.board;
+            this.gameState.currentPlayer = data.currentPlayer;
+            this.gameBoard.render();
+            this.playerPanel.update();
+        });
+        
+        this.wsService.on('onMoveMade', (data) => {
+            this.gameState.board[data.row][data.col] = data.player;
+            this.gameState.currentPlayer = data.nextPlayer;
+            this.gameBoard.updateCell(data.row, data.col, data.player);
+            this.playerPanel.update();
+            this.audioManager.play('click');
+        });
+        
+        this.wsService.on('onGameOver', (data) => {
+            this.gameState.status = data.isDraw ? 'draw' : 'won';
+            this.gameState.winner = data.winner;
+            this.gameState.winningLine = data.winningLine;
+            
+            if (data.isDraw) {
+                this.handleDraw();
+            } else {
+                this.handleWin();
+            }
+        });
+        
+        this.wsService.on('onPlayerJoined', (data) => {
+            this.hideWaitingModal();
+            this.playerPanel.setPlayer2Name(data.playerName);
+            this.audioManager.play('click');
+        });
+        
+        this.wsService.on('onPlayerLeft', (data) => {
+            this.showInfoModal(`${data.playerName} opuścił grę.`);
+        });
+        
+        this.wsService.on('onChatMessage', (data) => {
+            this.showChatMessage(data.playerName, data.message);
+        });
+        
+        this.wsService.on('onRematchRequest', () => {
+            this.showRematchRequestModal();
+        });
+        
+        this.wsService.on('onRematchAccepted', () => {
+            this.handleRestart();
+        });
+        
+        this.wsService.on('onError', (data) => {
+            console.error('WebSocket error:', data.message);
+        });
+        
+        this.wsService.on('onDisconnect', () => {
+            if (this.gameState.status === 'playing') {
+                this.showInfoModal('Połączenie zostało utracone.');
+            }
+        });
+    }
+
+    /**
+     * Show waiting for opponent modal
+     */
+    showWaitingModal() {
+        const modal = document.getElementById('waiting-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Hide waiting modal
+     */
+    hideWaitingModal() {
+        const modal = document.getElementById('waiting-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Show error modal
+     * @param {string} message - Error message
+     */
+    showErrorModal(message) {
+        const modal = document.getElementById('error-modal');
+        const msgEl = document.getElementById('error-message');
+        if (modal && msgEl) {
+            msgEl.textContent = message;
+            modal.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Show info modal
+     * @param {string} message - Info message
+     */
+    showInfoModal(message) {
+        const modal = document.getElementById('info-modal');
+        const msgEl = document.getElementById('info-message');
+        if (modal && msgEl) {
+            msgEl.textContent = message;
+            modal.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Show chat message
+     * @param {string} playerName - Player name
+     * @param {string} message - Chat message
+     */
+    showChatMessage(playerName, message) {
+        const chatContainer = document.getElementById('chat-messages');
+        if (chatContainer) {
+            const msgEl = document.createElement('div');
+            msgEl.className = 'chat-message';
+            msgEl.innerHTML = `<strong>${playerName}:</strong> ${message}`;
+            chatContainer.appendChild(msgEl);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    }
+
+    /**
+     * Show rematch request modal
+     */
+    showRematchRequestModal() {
+        const modal = document.getElementById('rematch-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
     }
 
     /**
@@ -320,19 +499,26 @@ class TicTacToeApp {
     async handleCellClick(row, col) {
         if (this.gameState.status !== 'playing') return;
         
-        // Make move
+        // For online mode, send move through WebSocket
+        if (this.gameState.settings.mode === 'online') {
+            this.wsService.sendMove(row, col);
+            return;
+        }
+        
+        // Make move locally
         const success = this.gameService.makeMove(row, col);
         if (!success) return;
         
         // Update UI
         this.gameBoard.updateCell(row, col, this.gameState.board[row][col]);
         this.playerPanel.update();
+        this.audioManager.play('click');
         
         // Check game status
         if (this.gameState.status === 'won') {
-            this.handleWin();
+            await this.handleWin();
         } else if (this.gameState.status === 'draw') {
-            this.handleDraw();
+            await this.handleDraw();
         } else if (this.gameState.settings.mode === 'ai' && this.gameState.currentPlayer === 'O') {
             // AI's turn
             setTimeout(() => this.handleAIMove(), 500);
@@ -354,7 +540,7 @@ class TicTacToeApp {
     /**
      * Handle win
      */
-    handleWin() {
+    async handleWin() {
         this.audioManager.play('win');
         this.gameBoard.highlightWinningCells(this.gameState.winningLine);
         this.scoreBoard.update();
@@ -374,6 +560,9 @@ class TicTacToeApp {
             difficulty: this.gameState.settings.difficulty
         });
         
+        // Submit score to backend
+        await this.gameService.submitScore(isPlayerWin ? 'win' : 'loss');
+        
         // Show result modal
         setTimeout(() => this.showResultModal('win'), 1000);
     }
@@ -381,7 +570,7 @@ class TicTacToeApp {
     /**
      * Handle draw
      */
-    handleDraw() {
+    async handleDraw() {
         this.audioManager.play('draw');
         this.scoreBoard.update();
         this.scoreBoard.highlightDraw();
@@ -390,6 +579,9 @@ class TicTacToeApp {
         this.userState.recordGame('draw', {
             mode: this.gameState.settings.mode
         });
+        
+        // Submit score to backend
+        await this.gameService.submitScore('draw');
         
         // Show result modal
         setTimeout(() => this.showResultModal('draw'), 1000);
@@ -462,8 +654,8 @@ class TicTacToeApp {
     /**
      * Handle hint
      */
-    handleHint() {
-        const hint = this.gameService.getHint();
+    async handleHint() {
+        const hint = await this.gameService.getHint();
         if (hint) {
             this.gameBoard.showHint(hint);
             this.audioManager.play('hover');
@@ -475,6 +667,12 @@ class TicTacToeApp {
      */
     handleExit() {
         this.hideResultModal();
+        
+        // Disconnect WebSocket if online
+        if (this.gameState.settings.mode === 'online') {
+            this.wsService.disconnect();
+        }
+        
         this.showMainMenu();
         this.particleEffects.clear();
     }
@@ -483,7 +681,45 @@ class TicTacToeApp {
      * Handle play again
      */
     handlePlayAgain() {
-        this.handleRestart();
+        if (this.gameState.settings.mode === 'online') {
+            // Request rematch through WebSocket
+            this.wsService.requestRematch();
+        } else {
+            this.handleRestart();
+        }
+    }
+
+    /**
+     * Handle rematch accept
+     */
+    handleRematchAccept() {
+        this.wsService.acceptRematch();
+        const modal = document.getElementById('rematch-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Handle rematch decline
+     */
+    handleRematchDecline() {
+        this.wsService.declineRematch();
+        const modal = document.getElementById('rematch-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+        this.handleExit();
+    }
+
+    /**
+     * Send chat message
+     * @param {string} message - Chat message
+     */
+    sendChatMessage(message) {
+        if (this.gameState.settings.mode === 'online' && message.trim()) {
+            this.wsService.sendChat(message);
+        }
     }
 }
 

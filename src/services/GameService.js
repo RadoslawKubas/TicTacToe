@@ -41,13 +41,33 @@ class GameService {
     }
 
     /**
-     * Get AI move
+     * Get AI move from backend or fallback to local
      * @returns {Promise<Array>} [row, col] or null
      */
     async getAIMove() {
         const difficulty = this.gameState.settings.difficulty;
         
-        // Simple AI for now (can be enhanced with backend integration)
+        // Try to get AI move from backend
+        try {
+            const gameStateData = {
+                board: this.gameState.board,
+                currentPlayer: this.gameState.currentPlayer,
+                settings: {
+                    boardSize: this.gameState.boardSize,
+                    winCondition: this.gameState.settings.winCondition || this.gameState.boardSize
+                }
+            };
+            
+            const response = await this.apiService.getAIMove(gameStateData, difficulty);
+            
+            if (response && typeof response.row === 'number' && typeof response.col === 'number') {
+                return [response.row, response.col];
+            }
+        } catch (error) {
+            console.warn('Backend AI unavailable, using local AI:', error.message);
+        }
+        
+        // Fallback to local AI
         return this.getLocalAIMove(difficulty);
     }
 
@@ -153,11 +173,78 @@ class GameService {
     }
 
     /**
-     * Get hint
-     * @returns {Array|null} [row, col] or null
+     * Get hint from backend or local
+     * @returns {Promise<Array|null>} [row, col] or null
      */
-    getHint() {
+    async getHint() {
+        // Try to get hint from backend
+        try {
+            const gameStateData = {
+                board: this.gameState.board,
+                currentPlayer: this.gameState.currentPlayer,
+                settings: {
+                    boardSize: this.gameState.boardSize,
+                    winCondition: this.gameState.settings.winCondition || this.gameState.boardSize
+                }
+            };
+            
+            const response = await this.apiService.getHint(gameStateData);
+            
+            if (response && typeof response.row === 'number' && typeof response.col === 'number') {
+                return [response.row, response.col];
+            }
+        } catch (error) {
+            console.warn('Backend hint unavailable, using local hint:', error.message);
+        }
+        
+        // Fallback to local hint
         return this.gameState.getHint();
+    }
+
+    /**
+     * Analyze current position
+     * @returns {Promise<Object>} Analysis result
+     */
+    async analyzePosition() {
+        try {
+            const gameStateData = {
+                board: this.gameState.board,
+                currentPlayer: this.gameState.currentPlayer,
+                settings: {
+                    boardSize: this.gameState.boardSize,
+                    winCondition: this.gameState.settings.winCondition || this.gameState.boardSize
+                }
+            };
+            
+            return await this.apiService.analyzePosition(gameStateData);
+        } catch (error) {
+            console.warn('Position analysis unavailable:', error.message);
+            return null;
+        }
+    }
+
+    /**
+     * Submit score to leaderboard
+     * @param {string} result - 'win', 'loss', or 'draw'
+     * @returns {Promise} Submission result
+     */
+    async submitScore(result) {
+        try {
+            const scoreData = {
+                playerName: this.gameState.players?.X || 'Player',
+                opponent: this.gameState.settings.mode === 'pve' 
+                    ? `AI-${this.gameState.settings.difficulty}` 
+                    : (this.gameState.players?.O || 'Player 2'),
+                result,
+                moves: this.gameState.moves.length,
+                duration: Date.now() - (this.gameState.startTime || Date.now())
+            };
+            
+            return await this.apiService.submitScore(scoreData);
+        } catch (error) {
+            console.warn('Failed to submit score:', error.message);
+            return null;
+        }
     }
 }
 
