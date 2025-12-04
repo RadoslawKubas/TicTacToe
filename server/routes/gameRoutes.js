@@ -146,19 +146,26 @@ router.post('/:id/move', async (req, res, next) => {
       try {
         const aiMoveResult = await aiEngine.selectMove(state, gameData.difficulty);
         
-        const aiResult = gameData.engine.makeMove(
-          aiMoveResult.row,
-          aiMoveResult.col,
-          state.currentPlayer
-        );
+        // Walidacja ruchu AI
+        if (!aiMoveResult || typeof aiMoveResult.row !== 'number' || typeof aiMoveResult.col !== 'number') {
+          console.error('AI returned invalid move');
+        } else {
+          const aiResult = gameData.engine.makeMove(
+            aiMoveResult.row,
+            aiMoveResult.col,
+            state.currentPlayer
+          );
 
-        if (aiResult.success) {
-          aiMove = {
-            row: aiMoveResult.row,
-            col: aiMoveResult.col,
-            thinkingTime: aiMoveResult.thinkingTime
-          };
-          Object.assign(state, aiResult.gameState);
+          if (aiResult.success) {
+            aiMove = {
+              row: aiMoveResult.row,
+              col: aiMoveResult.col,
+              thinkingTime: aiMoveResult.thinkingTime
+            };
+            Object.assign(state, aiResult.gameState);
+          } else {
+            console.error('AI move was invalid:', aiResult.error);
+          }
         }
       } catch (aiError) {
         console.error('AI move failed:', aiError);

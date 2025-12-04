@@ -78,9 +78,15 @@ class WebSocketServer {
   stop() {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
     }
 
     if (this.wss) {
+      // Zamknij wszystkie połączenia
+      this.wss.clients.forEach((ws) => {
+        ws.close();
+      });
+      
       this.wss.close(() => {
         logger.info('WebSocket Server closed');
       });

@@ -64,16 +64,18 @@ class PerfectAI {
    */
   _getOpeningMove(board) {
     const moveCount = this._countMoves(board);
+    const size = board.length;
+    const center = Math.floor(size / 2);
 
-    // Pierwszy ruch
+    // Pierwszy ruch - zawsze centrum
     if (moveCount === 0) {
-      return this.openingBook.first;
+      return { row: center, col: center };
     }
 
-    // Drugi ruch (odpowiedź)
-    if (moveCount === 1) {
+    // Drugi ruch (odpowiedź) - tylko dla planszy 3x3
+    if (moveCount === 1 && size === 3) {
       // Sprawdź czy przeciwnik zagrał centrum
-      if (board[1][1] !== null) {
+      if (board[center][center] !== null) {
         const corners = this.openingBook.responses.center;
         return corners[Math.floor(Math.random() * corners.length)];
       }
