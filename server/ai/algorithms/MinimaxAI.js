@@ -92,10 +92,10 @@ class MinimaxAI {
       
       for (const [row, col] of validMoves) {
         board[row][col] = currentPlayer;
-        const eval = this._minimax(board, depth - 1, false, aiPlayer);
+        const evalScore = this._minimax(board, depth - 1, false, aiPlayer);
         board[row][col] = null;
         
-        maxEval = Math.max(maxEval, eval);
+        maxEval = Math.max(maxEval, evalScore);
       }
       
       return maxEval;
@@ -104,10 +104,10 @@ class MinimaxAI {
       
       for (const [row, col] of validMoves) {
         board[row][col] = currentPlayer;
-        const eval = this._minimax(board, depth - 1, true, aiPlayer);
+        const evalScore = this._minimax(board, depth - 1, true, aiPlayer);
         board[row][col] = null;
         
-        minEval = Math.min(minEval, eval);
+        minEval = Math.min(minEval, evalScore);
       }
       
       return minEval;

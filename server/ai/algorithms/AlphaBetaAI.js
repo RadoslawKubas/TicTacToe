@@ -104,11 +104,11 @@ class AlphaBetaAI {
       
       for (const [row, col] of validMoves) {
         board[row][col] = currentPlayer;
-        const eval = this._alphaBeta(board, depth - 1, alpha, beta, false, aiPlayer);
+        const evalScore = this._alphaBeta(board, depth - 1, alpha, beta, false, aiPlayer);
         board[row][col] = null;
         
-        maxEval = Math.max(maxEval, eval);
-        alpha = Math.max(alpha, eval);
+        maxEval = Math.max(maxEval, evalScore);
+        alpha = Math.max(alpha, evalScore);
         
         if (beta <= alpha) {
           break; // Beta cut-off
@@ -124,11 +124,11 @@ class AlphaBetaAI {
       
       for (const [row, col] of validMoves) {
         board[row][col] = currentPlayer;
-        const eval = this._alphaBeta(board, depth - 1, alpha, beta, true, aiPlayer);
+        const evalScore = this._alphaBeta(board, depth - 1, alpha, beta, true, aiPlayer);
         board[row][col] = null;
         
-        minEval = Math.min(minEval, eval);
-        beta = Math.min(beta, eval);
+        minEval = Math.min(minEval, evalScore);
+        beta = Math.min(beta, evalScore);
         
         if (beta <= alpha) {
           break; // Alpha cut-off
