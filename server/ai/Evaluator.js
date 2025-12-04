@@ -51,9 +51,8 @@ class Evaluator {
    * Ocenia linie (wiersze, kolumny, przekątne)
    * @private
    */
-  _evaluateLines(board, player) {
+  _evaluateLines(board, player, winCondition = 3) {
     const size = board.length;
-    const winCondition = 3;
     let score = 0;
 
     // Wszystkie możliwe linie

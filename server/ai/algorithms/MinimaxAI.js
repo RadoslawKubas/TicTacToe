@@ -139,9 +139,8 @@ class MinimaxAI {
    * Sprawdza wygraną gracza
    * @private
    */
-  _checkWin(board, player) {
+  _checkWin(board, player, winCondition = 3) {
     const size = board.length;
-    const winCondition = 3;
 
     // Wiersze
     for (let row = 0; row < size; row++) {

@@ -338,7 +338,29 @@ class WebSocketServer {
    * @private
    */
   _handleDisconnect(clientId) {
-    this._handleLeaveRoom(clientId, null);
+    const roomId = this.playerRooms.get(clientId);
+    if (roomId) {
+      const room = this.rooms.get(roomId);
+      if (room) {
+        const playerName = room.getPlayerName(clientId);
+        room.removePlayer(clientId);
+        this.playerRooms.delete(clientId);
+
+        // Powiadom pozostałych graczy
+        this._broadcastToRoom(roomId, {
+          type: 'player_left',
+          playerName
+        });
+
+        // Usuń pusty pokój
+        if (room.isEmpty()) {
+          this.rooms.delete(roomId);
+          logger.info(`Room ${roomId} deleted (empty)`);
+        }
+
+        logger.info(`Player ${playerName} left room ${roomId}`);
+      }
+    }
     this.clients.delete(clientId);
     logger.info(`Client disconnected: ${clientId}`);
   }

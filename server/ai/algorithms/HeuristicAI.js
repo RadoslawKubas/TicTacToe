@@ -136,9 +136,8 @@ class HeuristicAI {
    * Sprawdza wygraną
    * @private
    */
-  _checkWin(board, player) {
+  _checkWin(board, player, winCondition = 3) {
     const size = board.length;
-    const winCondition = 3; // Domyślnie 3 w rzędzie
 
     // Sprawdź wiersze
     for (let row = 0; row < size; row++) {

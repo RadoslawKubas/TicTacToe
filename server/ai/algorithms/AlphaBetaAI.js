@@ -220,9 +220,8 @@ class AlphaBetaAI {
    * Sprawdza wygraną
    * @private
    */
-  _checkWin(board, player) {
+  _checkWin(board, player, winCondition = 3) {
     const size = board.length;
-    const winCondition = 3;
 
     // Wiersze i kolumny
     for (let i = 0; i < size; i++) {
