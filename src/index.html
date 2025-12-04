@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Zaawansowana gra Kółko i Krzyżyk z AI i trybem multiplayer">
+    <meta name="keywords" content="tictactoe, gra, kółko i krzyżyk, AI, multiplayer">
+    <meta name="author" content="TicTacToe Team">
+    
+    <title>TicTacToe - Zaawansowana Gra Web</title>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <link rel="stylesheet" href="styles/themes/light.css" id="theme-stylesheet">
+    
+    <!-- Preload important resources -->
+    <link rel="preload" href="assets/sounds/click.mp3" as="audio">
+    <link rel="preload" href="assets/sounds/win.mp3" as="audio">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader">
+            <div class="spinner"></div>
+            <p>Ładowanie gry...</p>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app" class="app-container">
+        <!-- Main Menu -->
+        <div id="main-menu" class="main-menu">
+            <h1 class="game-title">
+                <span class="title-x">Tic</span>
+                <span class="title-o">Tac</span>
+                <span class="title-x">Toe</span>
+            </h1>
+            <nav class="menu-buttons">
+                <button id="new-game-btn" class="menu-btn primary">Nowa Gra</button>
+                <button id="continue-btn" class="menu-btn secondary" disabled>Kontynuuj</button>
+                <button id="settings-btn" class="menu-btn secondary">Ustawienia</button>
+                <button id="leaderboard-btn" class="menu-btn secondary">Ranking</button>
+                <button id="tutorial-btn" class="menu-btn secondary">Tutorial</button>
+            </nav>
+        </div>
+
+        <!-- Game Mode Selector -->
+        <div id="game-mode-selector" class="game-mode-selector hidden">
+            <h2>Wybierz tryb gry</h2>
+            <div class="mode-grid">
+                <button class="mode-card" data-mode="local">
+                    <span class="mode-icon">👥</span>
+                    <h3>Gracz vs Gracz</h3>
+                    <p>Lokalnie na jednym urządzeniu</p>
+                </button>
+                <button class="mode-card" data-mode="ai">
+                    <span class="mode-icon">🤖</span>
+                    <h3>Gracz vs AI</h3>
+                    <p>Zagraj przeciwko komputerowi</p>
+                </button>
+                <button class="mode-card" data-mode="online">
+                    <span class="mode-icon">🌐</span>
+                    <h3>Multiplayer Online</h3>
+                    <p>Zagraj z innymi graczami</p>
+                </button>
+                <button class="mode-card" data-mode="tournament">
+                    <span class="mode-icon">🏆</span>
+                    <h3>Tryb Turniejowy</h3>
+                    <p>Weź udział w turnieju</p>
+                </button>
+                <button class="mode-card" data-mode="training">
+                    <span class="mode-icon">📚</span>
+                    <h3>Tryb Treningowy</h3>
+                    <p>Ćwicz swoje umiejętności</p>
+                </button>
+            </div>
+            <button id="back-to-menu" class="btn-back">← Wróć do Menu</button>
+        </div>
+
+        <!-- Difficulty Selector (for AI mode) -->
+        <div id="difficulty-selector" class="difficulty-selector hidden">
+            <h2>Wybierz poziom trudności</h2>
+            <div class="difficulty-grid">
+                <button class="difficulty-card" data-difficulty="easy">
+                    <h3>Łatwy</h3>
+                    <p>Losowe ruchy</p>
+                    <span class="stars">⭐</span>
+                </button>
+                <button class="difficulty-card" data-difficulty="medium">
+                    <h3>Średni</h3>
+                    <p>Podstawowa strategia</p>
+                    <span class="stars">⭐⭐</span>
+                </button>
+                <button class="difficulty-card" data-difficulty="hard">
+                    <h3>Trudny</h3>
+                    <p>Algorytm Minimax</p>
+                    <span class="stars">⭐⭐⭐</span>
+                </button>
+                <button class="difficulty-card" data-difficulty="expert">
+                    <h3>Ekspert</h3>
+                    <p>Minimax z alfa-beta</p>
+                    <span class="stars">⭐⭐⭐⭐</span>
+                </button>
+                <button class="difficulty-card" data-difficulty="impossible">
+                    <h3>Niemożliwy</h3>
+                    <p>Perfekcyjna gra</p>
+                    <span class="stars">⭐⭐⭐⭐⭐</span>
+                </button>
+            </div>
+            <button id="back-to-modes" class="btn-back">← Wróć</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="game-screen hidden">
+            <!-- Player Panels -->
+            <div class="players-container">
+                <div id="player1-panel" class="player-panel">
+                    <div class="player-avatar">X</div>
+                    <input type="text" class="player-name" value="Gracz 1" maxlength="20">
+                    <div class="player-score">0</div>
+                    <div class="turn-indicator" id="p1-turn">Twoja tura!</div>
+                </div>
+
+                <div id="player2-panel" class="player-panel">
+                    <div class="player-avatar">O</div>
+                    <input type="text" class="player-name" value="Gracz 2" maxlength="20">
+                    <div class="player-score">0</div>
+                    <div class="turn-indicator" id="p2-turn">Czekaj...</div>
+                </div>
+            </div>
+
+            <!-- Game Board -->
+            <div id="game-board-container" class="game-board-container">
+                <div id="game-board" class="game-board">
+                    <!-- Cells will be generated dynamically -->
+                </div>
+                <canvas id="particle-canvas" class="particle-canvas"></canvas>
+            </div>
+
+            <!-- Score Board -->
+            <div id="score-board" class="score-board">
+                <div class="score-item">
+                    <span class="score-label">Wygrane X:</span>
+                    <span id="wins-x" class="score-value">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Remisy:</span>
+                    <span id="draws" class="score-value">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Wygrane O:</span>
+                    <span id="wins-o" class="score-value">0</span>
+                </div>
+            </div>
+
+            <!-- Game Controls -->
+            <div class="game-controls">
+                <button id="restart-btn" class="control-btn">🔄 Nowa Runda</button>
+                <button id="undo-btn" class="control-btn">↶ Cofnij</button>
+                <button id="hint-btn" class="control-btn">💡 Podpowiedź</button>
+                <button id="exit-game-btn" class="control-btn danger">🚪 Wyjdź</button>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="settings-panel hidden">
+            <h2>Ustawienia</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <label for="theme-select">Motyw:</label>
+                    <select id="theme-select" class="setting-select">
+                        <option value="light">Jasny</option>
+                        <option value="dark">Ciemny</option>
+                        <option value="neon">Neonowy</option>
+                        <option value="retro">Retro</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label for="board-size-select">Rozmiar planszy:</label>
+                    <select id="board-size-select" class="setting-select">
+                        <option value="3" selected>3x3</option>
+                        <option value="4">4x4</option>
+                        <option value="5">5x5</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label for="language-select">Język:</label>
+                    <select id="language-select" class="setting-select">
+                        <option value="pl" selected>Polski</option>
+                        <option value="en">English</option>
+                        <option value="de">Deutsch</option>
+                        <option value="es">Español</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="sound-enabled" checked>
+                        <span>Dźwięk</span>
+                    </label>
+                </div>
+
+                <div class="setting-group">
+                    <label for="volume-slider">Głośność:</label>
+                    <input type="range" id="volume-slider" min="0" max="100" value="70" class="slider">
+                    <span id="volume-value">70%</span>
+                </div>
+
+                <div class="setting-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="animations-enabled" checked>
+                        <span>Animacje</span>
+                    </label>
+                </div>
+            </div>
+            <button id="close-settings" class="btn-back">← Wróć</button>
+        </div>
+
+        <!-- Tutorial -->
+        <div id="tutorial" class="tutorial hidden">
+            <h2>Tutorial</h2>
+            <div class="tutorial-content">
+                <div class="tutorial-step active" data-step="1">
+                    <h3>Witaj w TicTacToe!</h3>
+                    <p>Poznaj podstawowe zasady gry i dowiedz się, jak korzystać z interfejsu.</p>
+                    <img src="assets/images/tutorial-1.png" alt="Tutorial 1" class="tutorial-image">
+                </div>
+                <div class="tutorial-step" data-step="2">
+                    <h3>Zasady gry</h3>
+                    <p>Celem gry jest ułożenie trzech swoich symboli (X lub O) w linii - poziomej, pionowej lub ukośnej.</p>
+                </div>
+                <div class="tutorial-step" data-step="3">
+                    <h3>Tryby gry</h3>
+                    <p>Wybierz spośród różnych trybów: gra lokalna, przeciwko AI, online lub w turnieju.</p>
+                </div>
+                <div class="tutorial-step" data-step="4">
+                    <h3>Sterowanie</h3>
+                    <p>Kliknij na pole, aby postawić swój symbol. Możesz także używać klawiatury (1-9) do wyboru pola.</p>
+                </div>
+            </div>
+            <div class="tutorial-navigation">
+                <button id="tutorial-prev" class="tutorial-nav-btn" disabled>← Poprzedni</button>
+                <span id="tutorial-progress">1 / 4</span>
+                <button id="tutorial-next" class="tutorial-nav-btn">Następny →</button>
+            </div>
+            <button id="close-tutorial" class="btn-back">← Wróć do Menu</button>
+        </div>
+
+        <!-- Help Modal -->
+        <div id="help-modal" class="modal hidden">
+            <div class="modal-content">
+                <button class="modal-close">&times;</button>
+                <h2>Pomoc</h2>
+                <div class="help-content">
+                    <section>
+                        <h3>Zasady gry</h3>
+                        <p>Kółko i krzyżyk to gra dla dwóch graczy, którzy na przemian stawiają swoje znaki (X lub O) na planszy 3x3. Wygrywa ten, kto pierwszy ułoży trzy swoje znaki w linii.</p>
+                    </section>
+                    <section>
+                        <h3>Skróty klawiszowe</h3>
+                        <ul>
+                            <li><kbd>1-9</kbd> - Wybór pola na planszy</li>
+                            <li><kbd>R</kbd> - Restart gry</li>
+                            <li><kbd>U</kbd> - Cofnij ruch</li>
+                            <li><kbd>H</kbd> - Podpowiedź</li>
+                            <li><kbd>ESC</kbd> - Wyjście do menu</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3>FAQ</h3>
+                        <details>
+                            <summary>Jak zmienić motyw?</summary>
+                            <p>Przejdź do Ustawień i wybierz preferowany motyw z listy.</p>
+                        </details>
+                        <details>
+                            <summary>Czy mogę grać z przyjacielem online?</summary>
+                            <p>Tak! Wybierz tryb "Multiplayer Online" z menu głównego.</p>
+                        </details>
+                        <details>
+                            <summary>Jak działa AI?</summary>
+                            <p>AI wykorzystuje algorytm Minimax z optymalizacją Alpha-Beta na wyższych poziomach trudności.</p>
+                        </details>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- Win/Draw Notification -->
+        <div id="game-result-modal" class="modal hidden">
+            <div class="modal-content result-modal">
+                <h2 id="result-title">Wygrana!</h2>
+                <p id="result-message">Gracz X wygrał!</p>
+                <div class="result-actions">
+                    <button id="play-again-btn" class="btn primary">Zagraj ponownie</button>
+                    <button id="back-to-menu-result" class="btn secondary">Menu główne</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- State Management -->
+    <script src="state/GameState.js"></script>
+    <script src="state/UserState.js"></script>
+    
+    <!-- Utils -->
+    <script src="utils/DeviceDetector.js"></script>
+    <script src="utils/AccessibilityManager.js"></script>
+    
+    <!-- Services -->
+    <script src="services/ApiService.js"></script>
+    <script src="services/GameService.js"></script>
+    <script src="services/WebSocketService.js"></script>
+    
+    <!-- Audio -->
+    <script src="audio/AudioManager.js"></script>
+    
+    <!-- Animations -->
+    <script src="animations/AnimationEngine.js"></script>
+    <script src="animations/SymbolAnimations.js"></script>
+    <script src="animations/BoardAnimations.js"></script>
+    <script src="animations/ParticleEffects.js"></script>
+    
+    <!-- Components -->
+    <script src="components/GameCell.js"></script>
+    <script src="components/GameBoard.js"></script>
+    <script src="components/ScoreBoard.js"></script>
+    <script src="components/PlayerPanel.js"></script>
+    <script src="components/MainMenu.js"></script>
+    <script src="components/SettingsPanel.js"></script>
+    <script src="components/GameModeSelector.js"></script>
+    <script src="components/DifficultySelector.js"></script>
+    <script src="components/Tutorial.js"></script>
+    <script src="components/HelpModal.js"></script>
+    
+    <!-- Localization -->
+    <script src="i18n/LanguageManager.js"></script>
+    
+    <!-- Main App -->
+    <script src="app.js"></script>
+</body>
+</html>

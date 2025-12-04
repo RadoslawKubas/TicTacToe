@@ -1,0 +1,33 @@
+/* ===================================
+   Dark Theme
+   =================================== */
+
+:root {
+    /* Primary Colors */
+    --primary-color: #64B5F6;
+    --secondary-color: #FFB74D;
+    
+    /* Background Colors */
+    --background-color: #1a1a1a;
+    --surface-color: #2a2a2a;
+    
+    /* Text Colors */
+    --text-color: #e0e0e0;
+    --text-secondary: #aaaaaa;
+    
+    /* Border Colors */
+    --border-color: #404040;
+    
+    /* Status Colors */
+    --success-color: #66BB6A;
+    --error-color: #EF5350;
+    --warning-color: #FFA726;
+    
+    /* Symbol Colors */
+    --x-color: #F48FB1;
+    --o-color: #64B5F6;
+}
+
+body {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
