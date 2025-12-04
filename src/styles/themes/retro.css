@@ -1,0 +1,80 @@
+/* ===================================
+   Retro Theme
+   =================================== */
+
+:root {
+    /* Primary Colors */
+    --primary-color: #ff6b6b;
+    --secondary-color: #4ecdc4;
+    
+    /* Background Colors */
+    --background-color: #ffe66d;
+    --surface-color: #f7f7f7;
+    
+    /* Text Colors */
+    --text-color: #2c3e50;
+    --text-secondary: #7f8c8d;
+    
+    /* Border Colors */
+    --border-color: #2c3e50;
+    
+    /* Status Colors */
+    --success-color: #95e1d3;
+    --error-color: #ff6b6b;
+    --warning-color: #ffa502;
+    
+    /* Symbol Colors */
+    --x-color: #ff6b6b;
+    --o-color: #4ecdc4;
+}
+
+body {
+    background: repeating-linear-gradient(
+        45deg,
+        #ffe66d,
+        #ffe66d 10px,
+        #ffd93d 10px,
+        #ffd93d 20px
+    );
+    font-family: 'Courier New', monospace;
+}
+
+.game-board,
+.mode-card,
+.difficulty-card,
+.settings-content,
+.player-panel,
+.score-board,
+.modal-content {
+    border: 4px solid var(--text-color);
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+.game-cell {
+    border: 3px solid var(--text-color);
+}
+
+.btn,
+.menu-btn,
+.control-btn {
+    border: 3px solid var(--text-color);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.btn:hover,
+.menu-btn:hover,
+.control-btn:hover {
+    transform: translate(4px, 4px);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+h1, h2, h3 {
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+}
+
+.game-title {
+    text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+}

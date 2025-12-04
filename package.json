@@ -1,0 +1,23 @@
+{
+  "name": "tictactoe-web",
+  "version": "1.0.0",
+  "description": "Advanced TicTacToe web game with AI and multiplayer",
+  "main": "src/index.html",
+  "scripts": {
+    "dev": "npx http-server src -p 8080 -c-1",
+    "start": "npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "keywords": [
+    "tictactoe",
+    "game",
+    "web",
+    "ai",
+    "multiplayer"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
