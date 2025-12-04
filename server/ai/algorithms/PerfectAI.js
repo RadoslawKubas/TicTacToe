@@ -75,7 +75,7 @@ class PerfectAI {
     // Drugi ruch (odpowiedź) - tylko dla planszy 3x3
     if (moveCount === 1 && size === 3) {
       // Sprawdź czy przeciwnik zagrał centrum
-      if (board[center][center] !== null) {
+      if (board[center][center] !== null && board[center][center] !== '' && board[center][center] !== undefined) {
         const corners = this.openingBook.responses.center;
         return corners[Math.floor(Math.random() * corners.length)];
       }
@@ -94,7 +94,7 @@ class PerfectAI {
     let count = 0;
     for (let row of board) {
       for (let cell of row) {
-        if (cell !== null) count++;
+        if (cell !== null && cell !== '' && cell !== undefined) count++;
       }
     }
     return count;

@@ -54,7 +54,11 @@ class WebSocketService {
         this.playerName = playerName;
         this.playerId = playerId || this.generatePlayerId();
         
-        const wsURL = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/game/${gameId}`;
+        // Construct WebSocket URL - use port 3001 for local development
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const hostname = window.location.hostname;
+        const port = (hostname === 'localhost' || hostname === '127.0.0.1') ? '3001' : window.location.port;
+        const wsURL = `${protocol}//${hostname}:${port}/ws/game/${gameId}`;
         
         try {
             this.ws = new WebSocket(wsURL);
