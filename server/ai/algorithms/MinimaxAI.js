@@ -195,7 +195,7 @@ class MinimaxAI {
   _isBoardFull(board) {
     for (let row of board) {
       for (let cell of row) {
-        if (cell === null) return false;
+        if (cell === null || cell === '' || cell === undefined) return false;
       }
     }
     return true;
@@ -209,7 +209,7 @@ class MinimaxAI {
     const moves = [];
     for (let row = 0; row < board.length; row++) {
       for (let col = 0; col < board[row].length; col++) {
-        if (board[row][col] === null) {
+        if (board[row][col] === null || board[row][col] === '' || board[row][col] === undefined) {
           moves.push([row, col]);
         }
       }

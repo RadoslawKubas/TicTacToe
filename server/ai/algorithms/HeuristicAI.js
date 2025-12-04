@@ -27,7 +27,7 @@ class HeuristicAI {
     }
 
     // 3. Priorytetyzuj centrum (dla planszy 3x3)
-    if (size === 3 && board[1][1] === null) {
+    if (size === 3 && (board[1][1] === null || board[1][1] === '' || board[1][1] === undefined)) {
       return { row: 1, col: 1, evaluation: 0.7, reason: 'Center position' };
     }
 
@@ -189,7 +189,7 @@ class HeuristicAI {
     const moves = [];
     for (let row = 0; row < board.length; row++) {
       for (let col = 0; col < board[row].length; col++) {
-        if (board[row][col] === null) {
+        if (board[row][col] === null || board[row][col] === '' || board[row][col] === undefined) {
           moves.push([row, col]);
         }
       }

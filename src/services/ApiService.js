@@ -5,7 +5,10 @@
 
 class ApiService {
     constructor() {
-        this.baseURL = window.location.origin + '/api';
+        // Check if backend URL is configured, otherwise use default backend port
+        this.baseURL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? `http://${window.location.hostname}:3000/api`
+            : window.location.origin + '/api';
         this.timeout = 10000;
     }
 
